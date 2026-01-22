@@ -8,29 +8,30 @@
   <title>Find image</title>
   <link rel="stylesheet" href="./css/css-loader.css">
   <script type="module" crossorigin src="/goit-js-hw-12/index.js"></script>
-  <link rel="modulepreload" crossorigin href="/goit-js-hw-12/assets/vendor-B3IAfeER.js">
+  <link rel="modulepreload" crossorigin href="/goit-js-hw-12/assets/vendor-BkVuWn-o.js">
   <link rel="stylesheet" crossorigin href="/goit-js-hw-12/assets/vendor-DumFYO8Z.css">
-  <link rel="stylesheet" crossorigin href="/goit-js-hw-12/assets/index-Du1_mPcq.css">
+  <link rel="stylesheet" crossorigin href="/goit-js-hw-12/assets/index-u9smZ0ci.css">
 </head>
 
 <body>
-
   <main>
     <form class="form">
       <div class="input-group">
         <label>
-          <input type="text" name="search-text" id="text" placeholder="Search images...">
+          <input type="text" name="search-text" id="text" placeholder="Search images..." />
         </label>
         <button type="submit" id="submit">Search</button>
       </div>
-
     </form>
+
+    <div id="search-loader" class="loader"></div>
+
     <ul class="gallery"></ul>
 
-    <div id="page-loader" class="loader loader-default"></div>
-
+    <button id="myButton" class="loader-button">
+      Load more <span class="spinner"></span>
+    </button>
   </main>
-
 </body>
 
 </html>
