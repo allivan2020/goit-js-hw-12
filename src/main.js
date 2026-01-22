@@ -4,62 +4,127 @@ import 'izitoast/dist/css/iziToast.min.css';
 import {
   createGallery,
   clearGallery,
+  showLoadMoreButton,
+  hideLoadMoreButton,
   showLoader,
   hideLoader,
 } from './js/render-functions.js';
 
 const form = document.querySelector('.form');
 const input = document.getElementById('text');
+const loadMoreBtn = document.getElementById('myButton');
 
-form.addEventListener('submit', event => {
-  event.preventDefault();
+let page = 1;
+let query = '';
+const perPage = 15;
 
-  const query = input.value.trim();
+function setButtonLoading(isLoading) {
+  if (isLoading) {
+    loadMoreBtn.classList.add('loading');
+    loadMoreBtn.disabled = true;
+  } else {
+    loadMoreBtn.classList.remove('loading');
+    loadMoreBtn.disabled = false;
+  }
+}
+
+function scrollAfterLoad() {
+  const galleryItem = document.querySelector('.gallery li');
+  if (galleryItem) {
+    const { height } = galleryItem.getBoundingClientRect();
+    window.scrollBy({ top: height * 2, behavior: 'smooth' });
+  }
+}
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  query = input.value.trim();
   input.value = '';
+  page = 1;
+  clearGallery();
+  hideLoadMoreButton();
 
   if (!query) {
     iziToast.error({
-      message:
-        'Sorry, there are no images matching your search query. Please try again!',
+      message: 'Enter search query!',
       position: 'topRight',
       timeout: 3000,
     });
-    input.classList.add('error');
-    input.focus();
     return;
-  } else {
-    input.classList.remove('error');
   }
 
-  clearGallery();
-  showLoader();
+  try {
+    showLoader();
+    const data = await getImagesByQuery(query, page);
+    hideLoader();
 
-  getImagesByQuery(query)
-    .then(data => {
-      hideLoader();
-
-      if (!data.hits || data.hits.length === 0) {
-        iziToast.error({
-          message:
-            'Sorry, there are no images matching your search query. Please try again!',
-          position: 'topRight',
-          timeout: 3000,
-        });
-        return;
-      }
-
-      createGallery(data.hits);
-
-      input.focus();
-    })
-    .catch(error => {
-      hideLoader();
+    if (!data.hits || data.hits.length === 0) {
       iziToast.error({
-        title: 'Error',
-        message: 'Something went wrong. Please try again later.',
+        message: 'No images found. Try another query.',
         position: 'topRight',
-        timeout: 4000,
+        timeout: 3000,
       });
-      console.error('Fetch error:', error);
+      return;
+    }
+
+    createGallery(data.hits);
+
+    if (page * perPage >= data.totalHits) {
+      hideLoadMoreButton();
+      iziToast.info({
+        message: "We're sorry, but you've reached the end of search results.",
+        position: 'topRight',
+        timeout: 3000,
+      });
+    } else {
+      showLoadMoreButton();
+    }
+  } catch (error) {
+    hideLoader();
+    iziToast.error({
+      message: 'Something went wrong. Try again later.',
+      position: 'topRight',
+      timeout: 3000,
     });
+    console.error(error);
+  }
+});
+
+loadMoreBtn.addEventListener('click', async () => {
+  page += 1;
+  setButtonLoading(true);
+  try {
+    const data = await getImagesByQuery(query, page);
+    setButtonLoading(false);
+
+    if (!data.hits || data.hits.length === 0) {
+      hideLoadMoreButton();
+      iziToast.info({
+        message: "We're sorry, but you've reached the end of search results.",
+        position: 'topRight',
+        timeout: 3000,
+      });
+      return;
+    }
+
+    createGallery(data.hits);
+    scrollAfterLoad();
+
+    if (page * perPage >= data.totalHits) {
+      hideLoadMoreButton();
+      iziToast.info({
+        message: "We're sorry, but you've reached the end of search results.",
+        position: 'topRight',
+        timeout: 3000,
+      });
+    }
+  } catch (error) {
+    setButtonLoading(false);
+    iziToast.error({
+      message: 'Something went wrong. Try again later.',
+      position: 'topRight',
+      timeout: 3000,
+    });
+    console.error(error);
+  }
 });

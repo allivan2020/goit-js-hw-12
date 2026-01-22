@@ -11,23 +11,24 @@
 </head>
 
 <body>
-
   <main>
     <form class="form">
       <div class="input-group">
         <label>
-          <input type="text" name="search-text" id="text" placeholder="Search images...">
+          <input type="text" name="search-text" id="text" placeholder="Search images..." />
         </label>
         <button type="submit" id="submit">Search</button>
       </div>
-
     </form>
+
+    <div id="search-loader" class="loader"></div>
+
     <ul class="gallery"></ul>
 
-    <div id="page-loader" class="loader loader-default"></div>
-
+    <button id="myButton" class="loader-button">
+      Load more <span class="spinner"></span>
+    </button>
   </main>
-
   <script type="module" src="./main.js"></script>
 </body>
 
